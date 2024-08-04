@@ -4,7 +4,7 @@ const clases_carrera = async (req, res) => {
     const { id_carrera } = req.params;
 
     const query = `
-      SELECT 
+      SELECT
           b.id_bloque, 
           b.nombre_bloque AS bloque,
           GROUP_CONCAT(
@@ -16,6 +16,7 @@ const clases_carrera = async (req, res) => {
                       SELECT 
                           GROUP_CONCAT(
                               JSON_OBJECT(
+                                  'id_detalle', dp.id_detalle,
                                   'seccion', dp.seccion,
                                   'catedratico', ct.nombre_catedratico,
                                   'hora_inicio', dp.hora_inicio

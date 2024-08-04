@@ -36,7 +36,7 @@ const insertarDetallePeriodo = async (req, res) => {
 
     // Obtener todas las carreras que llevan la clase especificada
     const [carrerasBloques] = await db.query(`
-      SELECT icc.id_carrera, icc.id_bloque,  c.nombre_carrera
+      SELECT icc.id_carrera, icc.id_bloque, c.nombre_carrera
       FROM carrera_clase_bloque icc
       JOIN carreras c on icc.id_carrera = c.id_carrera
       WHERE id_clase = ?;

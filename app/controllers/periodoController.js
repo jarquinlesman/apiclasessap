@@ -2,18 +2,20 @@ const db = require('../config/db');
 
 const periodos = (req, res) => {
     const datos = req.body;
-    let id_period = datos.id_periodo;
+    let periodo = datos.periodo;
     let fecha_ini = datos.fecha_inicio;
     let fecha_fin = datos.fecha_final;
     let year = datos.year;
 
+    let id_periodo = '';
+
     // Convertir id_period en el formato deseado
-    if (id_period === 'Periodo I') {
-        id_period = 'I' + year;
-    } else if (id_period === 'Periodo II') {
-        id_period = 'II' + year;
-    } else if (id_period === 'Periodo III') {
-        id_period = 'III' + year;
+    if (periodo === 'Periodo I') {
+        id_periodo = 'I' + year;
+    } else if (periodo === 'Periodo II') {
+        id_periodo = 'II' + year;
+    } else if (periodo === 'Periodo III') {
+        id_periodo = 'III' + year;
     } else {
         res.status(400).send('Período no válido');
         return;
@@ -21,7 +23,7 @@ const periodos = (req, res) => {
 
     let insert_periodo = 'INSERT INTO periodos (id_periodo, fecha_inicio, fecha_final) VALUES (?, ?, ?)';
 
-    db.query(insert_periodo, [id_period, fecha_ini, fecha_fin], (err, results) => {
+    db.query(insert_periodo, [id_periodo, fecha_ini, fecha_fin], (err, results) => {
         if (err) {
             console.error('Error ejecutando la consulta:', err);
             res.status(500).send('Error en la consulta');
