@@ -30,23 +30,24 @@ const actualizarDetallePeriodo = async (req, res) => {
 
         const ultimoPeriodoId = ultimoPeriodo[0].id_periodo;
 
-        // Consultar los id_detalle que coincidan con la clase y la sección actual
+        // Consultar los id_detalle que coincidan con la clase, la sección y el período actual
         const [detalles] = await db.query(`
-            SELECT id_detalle, id_periodo, id_ccb
-            FROM detalle_periodo 
-            WHERE seccion = ? AND id_periodo = ?;
-        `, [seccion, ultimoPeriodoId]);
+            SELECT dp.id_detalle, dp.id_periodo, dp.id_ccb, dp.hora_inicio, dp.id_catedratico
+            FROM detalle_periodo dp
+            JOIN carrera_clase_bloque ccb ON dp.id_ccb = ccb.id_ccb
+            WHERE ccb.id_clase = ? AND dp.seccion = ? AND dp.id_periodo = ?;
+        `, [id_clase, seccion, ultimoPeriodoId]);
 
         // Verificar si se encontraron registros
         if (detalles.length === 0) {
-            return res.status(404).json({ error: 'No se encontraron detalles con la clase y sección especificadas en el período actual.' });
+            return res.status(404).json({ error: 'No se encontraron detalles con la clase, sección y período especificados.' });
         }
 
         // Recolectar detalles para verificar conflictos
         let actualizaciones = [];
 
         for (const detalle of detalles) {
-            const { id_detalle, id_ccb } = detalle;
+            const { id_detalle, id_ccb, hora_inicio: horaInicioActual, id_catedratico: idCatedraticoActual } = detalle;
 
             // Obtener todas las carreras que llevan la clase especificada
             const [carrerasBloques] = await db.query(`
@@ -72,7 +73,7 @@ const actualizarDetallePeriodo = async (req, res) => {
                 `, [id_bloque, hora_inicio, id_clase, ultimoPeriodoId]);
 
                 if (bloqueConflicto.length > 0) {
-                    return res.status(400).json({ error: `Otra clase del mismo bloque ya ha sido asignada en ese horario para la carrera ${nombre_carrera}.` });
+                    return res.status(400).json({ error: `Otra clase del mismo bloque ya ha sido asignada en ese horario en otra carrera.` });
                 }
 
                 // Verificar si el catedrático ya tiene una clase a la misma hora
@@ -91,7 +92,7 @@ const actualizarDetallePeriodo = async (req, res) => {
 
             // Determinar si se debe generar una nueva sección o no
             let nuevaSeccion = seccion;
-            if (hora_inicio !== detalle.hora_inicio) {
+            if (hora_inicio !== horaInicioActual) {
                 // Generar nueva sección si la hora ha cambiado
                 let [seccionExistente] = await db.query(`
                     SELECT seccion 
