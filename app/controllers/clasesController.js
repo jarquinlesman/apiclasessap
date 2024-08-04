@@ -1,7 +1,7 @@
 const db = require('../config/db.js');
 
 const clases_carrera = async (req, res) => {
-    const { id_carrera } = req.params;
+    const { id_carrera, id_periodo } = req.params;
 
     const query = `
       SELECT
@@ -28,12 +28,7 @@ const clases_carrera = async (req, res) => {
                           LEFT JOIN catedraticos ct ON dp.id_catedratico = ct.id_catedratico
                       WHERE 
                           dp.id_ccb = ccb.id_ccb
-                          AND dp.id_periodo = (
-                              SELECT id_periodo 
-                              FROM periodos 
-                              ORDER BY fecha_inicio DESC 
-                              LIMIT 1
-                          )
+                          AND dp.id_periodo = ?
                   )
               )
               SEPARATOR ','
@@ -50,21 +45,31 @@ const clases_carrera = async (req, res) => {
           b.id_bloque, 
           b.nombre_bloque;
     `;
-  
+
     try {
-      const [rows] = await db.query(query, [id_carrera]);
-  
+      const [rows] = await db.query(query, [id_periodo, id_carrera]);
+
       rows.forEach(row => {
         if (row.clases) {
-          row.clases = JSON.parse(`[${row.clases}]`);
+          const clasesArray = JSON.parse(`[${row.clases}]`);
+          row.clases = clasesArray.map(clase => {
+            if (clase.secciones) {
+              clase.secciones = JSON.parse(`[${clase.secciones}]`);
+            } else {
+              clase.secciones = null;
+            }
+            return clase;
+          });
+        } else {
+          row.clases = null;
         }
       });
-  
+
       res.json(rows);
     } catch (err) {
       console.error(err);
       res.status(500).send('Error al obtener las clases');
     }
-  };
+};
 
 module.exports = { clases_carrera };
