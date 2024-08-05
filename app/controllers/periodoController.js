@@ -5,17 +5,17 @@ const periodos = (req, res) => {
     let periodo = datos.periodo;
     let fecha_ini = datos.fecha_inicio;
     let fecha_fin = datos.fecha_final;
-    let year = datos.year;
+    let year = datos.anio;
 
     let id_periodo = '';
 
     // Convertir id_period en el formato deseado
     if (periodo === 'Periodo I') {
-        id_periodo = 'I' + year;
+        id_periodo = year + 'I';
     } else if (periodo === 'Periodo II') {
-        id_periodo = 'II' + year;
+        id_periodo = year + 'II';
     } else if (periodo === 'Periodo III') {
-        id_periodo = 'III' + year;
+        id_periodo = year + 'III';
     } else {
         res.status(400).send('Período no válido');
         return;
