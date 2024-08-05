@@ -1,7 +1,7 @@
 const db = require('../config/db');
 
 const mostrarCatedraticos = async (req, res) => {
-    const query = 'SELECT id_catedratico, nombre_catedratico FROM catedraticos';
+    const query = 'SELECT id_catedratico, nombre_catedratico FROM catedraticos ORDER BY nombre_catedratico ASC';
     try {
         const [results] = await db.query(query);
         res.json(results);

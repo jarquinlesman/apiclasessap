@@ -72,4 +72,28 @@ const clases_carrera = async (req, res) => {
     }
 };
 
-module.exports = { clases_carrera };
+const eliminarSeccion = async (req, res) => {
+  const { id_seccion, id_clase } = req.body;
+  const { id_periodo } = req.params;
+
+  try {
+      // Eliminar las secciones correspondientes en todas las relaciones id_ccb asociadas con el id_clase
+      await db.query(
+          `DELETE dp
+           FROM detalle_periodo dp
+           INNER JOIN carrera_clase_bloque ccb
+           ON dp.id_ccb = ccb.id_ccb
+           WHERE dp.id_periodo = ? 
+             AND dp.seccion = ? 
+             AND ccb.id_clase = ?`,
+          [id_periodo, id_seccion, id_clase]
+      );
+
+      res.send('Sección eliminada correctamente en todas las carreras.');
+  } catch (err) {
+      console.error(err);
+      res.status(500).send('Error al eliminar la sección.');
+  }
+};
+
+module.exports = { clases_carrera, eliminarSeccion };
